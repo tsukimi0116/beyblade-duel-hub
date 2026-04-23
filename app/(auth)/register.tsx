@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Link } from 'expo-router';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
+import { Link, router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,6 +36,9 @@ export default function RegisterScreen() {
     setLoading(true);
     try {
       await signUp(data.email, data.password, data.username, data.city);
+      Alert.alert('註冊成功', '帳號已建立，請登入', [
+        { text: '前往登入', onPress: () => router.replace('/(auth)/login') },
+      ]);
     } catch (e: any) {
       setError(e.message || '註冊失敗，請再試一次');
     } finally {
