@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { registerPushToken } from '../lib/notifications';
 
 interface Profile {
   id: string;
@@ -34,8 +35,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
     supabase.auth.onAuthStateChange(async (_event, session) => {
       set({ session, user: session?.user ?? null });
-      if (session?.user) await get().refreshProfile();
-      else set({ profile: null });
+      if (session?.user) {
+        await get().refreshProfile();
+        registerPushToken(session.user.id);
+      } else {
+        set({ profile: null });
+      }
     });
   },
 
