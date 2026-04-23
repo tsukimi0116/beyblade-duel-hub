@@ -15,6 +15,7 @@ import { Button } from '../../src/components/ui/Button';
 import { ParticipantList } from '../../src/components/ParticipantList';
 import { openMap } from '../../src/utils/mapLink';
 import { formatFull, formatCountdown } from '../../src/utils/formatDate';
+import { sendNotificationToRoom } from '../../src/lib/notifications';
 import { spacing, radius } from '../../src/theme/spacing';
 import { typography } from '../../src/theme/typography';
 
@@ -26,7 +27,7 @@ const BATTLE_TYPE_LABEL: Record<string, string> = {
 
 export default function RoomDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { colors } = useTheme();
   const { room, participants, loading } = useRoom(id!);
   const [actionLoading, setActionLoading] = useState(false);
@@ -66,6 +67,7 @@ export default function RoomDetailScreen() {
     try {
       const { error } = await supabase.from('room_participants').insert({ room_id: room.id, user_id: user!.id });
       if (error) throw error;
+      sendNotificationToRoom(room.id, '有人加入約戰！', `「${profile?.username}」加入了你的約戰！`, user!.id);
     } catch (e: any) {
       Alert.alert('錯誤', e.message);
     } finally {
@@ -81,6 +83,7 @@ export default function RoomDetailScreen() {
       { text: '退出', style: 'destructive', onPress: async () => {
         setActionLoading(true);
         await supabase.from('room_participants').delete().eq('room_id', room.id).eq('user_id', user!.id);
+        sendNotificationToRoom(room.id, '有人退出約戰', `「${profile?.username}」退出了約戰`, user!.id);
         setActionLoading(false);
         router.back();
       }},
@@ -93,6 +96,7 @@ export default function RoomDetailScreen() {
       { text: '關閉', style: 'destructive', onPress: async () => {
         setActionLoading(true);
         await supabase.from('rooms').update({ status: 'cancelled' }).eq('id', room.id);
+        sendNotificationToRoom(room.id, '約戰已取消', `約戰「${room.title}」已被取消`, user!.id);
         setActionLoading(false);
         router.back();
       }},
