@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -87,11 +87,13 @@ export default function LoginScreen() {
 
         <Button title="登入" onPress={handleSubmit(onSubmit)} loading={loading} style={styles.btn} />
 
-        <Link href="/(auth)/register">
-          <Text style={[styles.link, { color: colors.textSecondary }]}>
-            還沒帳號？ <Text style={{ color: colors.primary }}>立即註冊</Text>
-          </Text>
-        </Link>
+        <View style={styles.linkWrapper}>
+          <Link href="/(auth)/register">
+            <Text style={[styles.link, { color: colors.textSecondary }]}>
+              還沒帳號？ <Text style={{ color: colors.primary }}>立即註冊</Text>
+            </Text>
+          </Link>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -104,5 +106,6 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: typography.sizes.md, textAlign: 'center', marginBottom: spacing.xxl },
   errorMsg: { fontSize: typography.sizes.sm, textAlign: 'center', marginBottom: spacing.md },
   btn: { marginTop: spacing.md },
-  link: { textAlign: 'center', marginTop: spacing.xl, fontSize: typography.sizes.sm },
+  linkWrapper: { marginTop: spacing.xl, alignItems: 'center' },
+  link: { textAlign: 'center', fontSize: typography.sizes.sm },
 });
