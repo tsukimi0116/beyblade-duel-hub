@@ -68,6 +68,9 @@ export default function RoomDetailScreen() {
       const { error } = await supabase.from('room_participants').insert({ room_id: room.id, user_id: user!.id });
       if (error) throw error;
       sendNotificationToRoom(room.id, '有人加入約戰！', `「${profile?.username}」加入了你的約戰！`, user!.id);
+      Alert.alert('加入成功', '你已成功加入約戰！', [
+        { text: '確認', onPress: () => router.replace('/(tabs)') },
+      ]);
     } catch (e: any) {
       Alert.alert('錯誤', e.message);
     } finally {
