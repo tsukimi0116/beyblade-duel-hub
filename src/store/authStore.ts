@@ -50,15 +50,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   },
 
   signUp: async (email, password, username, city) => {
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { username, city: city || null } },
+    });
     if (error) throw error;
-    if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ username, city: city || null })
-        .eq('id', data.user.id);
-      if (profileError) throw profileError;
-    }
   },
 
   signOut: async () => {
