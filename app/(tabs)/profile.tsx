@@ -10,6 +10,7 @@ import { Room } from '../../src/hooks/useRooms';
 import { Avatar } from '../../src/components/ui/Avatar';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
+import { CityPicker } from '../../src/components/ui/CityPicker';
 import { RoomCard } from '../../src/components/RoomCard';
 import { ThemeToggle } from '../../src/components/ThemeToggle';
 import { Card } from '../../src/components/ui/Card';
@@ -71,7 +72,7 @@ export default function ProfileScreen() {
               {editing ? (
                 <>
                   <Input label="暱稱" value={username} onChangeText={setUsername} style={styles.editInput} />
-                  <Input label="城市" value={city} onChangeText={setCity} placeholder="選填" style={styles.editInput} />
+                  <CityPicker label="城市" value={city || undefined} onChange={v => setCity(v ?? '')} style={styles.editInput} />
                 </>
               ) : (
                 <>

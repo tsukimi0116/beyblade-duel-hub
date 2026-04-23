@@ -8,6 +8,7 @@ import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
+import { CityPicker } from '../../src/components/ui/CityPicker';
 import { spacing } from '../../src/theme/spacing';
 import { typography } from '../../src/theme/typography';
 
@@ -101,11 +102,10 @@ export default function RegisterScreen() {
           control={control}
           name="city"
           render={({ field: { onChange, value } }) => (
-            <Input
+            <CityPicker
               label="城市（選填）"
-              placeholder="台北、台中、高雄..."
               value={value}
-              onChangeText={onChange}
+              onChange={onChange}
             />
           )}
         />
