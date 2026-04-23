@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, Switch, Platform, Alert,
+  TouchableOpacity, Switch, Alert,
 } from 'react-native';
 import { router } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -80,7 +80,6 @@ export default function CreateRoomScreen() {
 
       if (error) throw error;
 
-      await supabase.from('room_participants').insert({ room_id: room.id, user_id: user.id });
       router.replace(`/room/${room.id}`);
     } catch (e: any) {
       Alert.alert('錯誤', e.message || '開房失敗，請再試一次');

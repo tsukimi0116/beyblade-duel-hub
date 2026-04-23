@@ -85,10 +85,18 @@ export default function RoomDetailScreen() {
       { text: '取消', style: 'cancel' },
       { text: '退出', style: 'destructive', onPress: async () => {
         setActionLoading(true);
-        await supabase.from('room_participants').delete().eq('room_id', room.id).eq('user_id', user!.id);
-        sendNotificationToRoom(room.id, '有人退出約戰', `「${profile?.username}」退出了約戰`, user!.id);
-        setActionLoading(false);
-        router.back();
+        try {
+          const { error } = await supabase.from('room_participants').delete().eq('room_id', room.id).eq('user_id', user!.id);
+          if (error) throw error;
+          sendNotificationToRoom(room.id, '有人退出約戰', `「${profile?.username}」退出了約戰`, user!.id);
+          Alert.alert('已退出', '你已成功退出約戰', [
+            { text: '確認', onPress: () => router.replace('/(tabs)') },
+          ]);
+        } catch (e: any) {
+          Alert.alert('錯誤', e.message);
+        } finally {
+          setActionLoading(false);
+        }
       }},
     ]);
   };
