@@ -196,7 +196,7 @@ export default function RoomDetailScreen() {
         {isHost ? (
           <Button title="關閉房間" onPress={handleClose} variant="danger" loading={actionLoading} />
         ) : isParticipant ? (
-          <Button title="退出約戰" onPress={handleLeave} variant="secondary" loading={actionLoading} />
+          <Button title="退出約戰" onPress={handleLeave} variant="danger" loading={actionLoading} />
         ) : (
           <Button
             title={room.status === 'full' ? '房間已滿' : '加入約戰'}
