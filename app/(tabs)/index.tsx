@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, SafeAreaView } from 'react-native';
 import { router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -16,6 +17,8 @@ export default function LobbyScreen() {
   const { colors } = useTheme();
   const [filter, setFilter] = useState<FilterKey>('all');
   const { rooms, loading, refreshing, refresh } = useRooms(filter);
+
+  useFocusEffect(useCallback(() => { refresh(); }, []));
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>

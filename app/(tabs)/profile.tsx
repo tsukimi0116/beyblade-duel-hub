@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useFocusEffect } from 'expo-router';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
   TouchableOpacity, Alert,
@@ -30,18 +31,18 @@ export default function ProfileScreen() {
     if (profile) { setUsername(profile.username); setCity(profile.city || ''); }
   }, [profile]);
 
-  useEffect(() => {
+  const fetchMyRooms = useCallback(async () => {
     if (!user) return;
-    supabase
+    const { data } = await supabase
       .from('room_participants')
       .select('room:rooms!room_id(*, host:profiles!host_id(username, avatar_url))')
-      .eq('user_id', user.id)
-      .then(({ data }) => {
-        const rooms = (data ?? []).map((d: any) => d.room).filter(Boolean) as Room[];
-        rooms.sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
-        setMyRooms(rooms);
-      });
+      .eq('user_id', user.id);
+    const rooms = (data ?? []).map((d: any) => d.room).filter(Boolean) as Room[];
+    rooms.sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
+    setMyRooms(rooms);
   }, [user]);
+
+  useFocusEffect(useCallback(() => { fetchMyRooms(); }, [fetchMyRooms]));
 
   const handleSave = async () => {
     if (!user) return;
@@ -50,6 +51,7 @@ export default function ProfileScreen() {
     setSaving(false);
     if (error) { Alert.alert('錯誤', error.message); return; }
     await refreshProfile();
+    await fetchMyRooms();
     setEditing(false);
   };
 
