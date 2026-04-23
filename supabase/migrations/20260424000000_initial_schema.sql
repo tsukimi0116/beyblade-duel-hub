@@ -1,8 +1,6 @@
-# Supabase Schema
+-- Initial schema: profiles, rooms, room_participants, push_tokens
+-- with RLS policies and triggers
 
-貼入 Supabase → SQL Editor → 點 Run
-
-```sql
 create extension if not exists "uuid-ossp";
 
 create table public.profiles (
@@ -17,12 +15,8 @@ create table public.profiles (
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, username, city)
-  values (
-    new.id,
-    coalesce(new.raw_user_meta_data->>'username', split_part(new.email, '@', 1)),
-    new.raw_user_meta_data->>'city'
-  );
+  insert into public.profiles (id, username)
+  values (new.id, split_part(new.email, '@', 1));
   return new;
 end;
 $$ language plpgsql security definer;
@@ -93,13 +87,13 @@ begin
   if TG_OP = 'INSERT' then
     update public.rooms
     set current_players = current_players + 1,
-        status = case when current_players + 1 >= max_players then 'full'::room_status else 'open'::room_status end,
+        status = case when current_players + 1 >= max_players then 'full' else 'open' end,
         updated_at = now()
     where id = NEW.room_id;
   elsif TG_OP = 'DELETE' then
     update public.rooms
     set current_players = current_players - 1,
-        status = 'open'::room_status,
+        status = 'open',
         updated_at = now()
     where id = OLD.room_id;
   end if;
@@ -110,4 +104,3 @@ $$ language plpgsql security definer;
 create trigger on_participant_change
   after insert or delete on public.room_participants
   for each row execute procedure update_room_player_count();
-```
