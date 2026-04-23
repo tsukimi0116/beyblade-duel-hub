@@ -18,16 +18,14 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || !fontsLoaded) return;
     const inAuthGroup = segments[0] === '(auth)';
     if (!session && !inAuthGroup) {
       router.replace('/(auth)/login');
     } else if (session && inAuthGroup) {
       router.replace('/(tabs)');
     }
-  }, [session, loading, segments]);
-
-  if (!fontsLoaded || loading) return null;
+  }, [session, loading, segments, fontsLoaded]);
 
   return (
     <>
