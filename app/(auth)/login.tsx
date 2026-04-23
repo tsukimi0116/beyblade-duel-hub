@@ -1,15 +1,19 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { Link } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import * as SecureStore from 'expo-secure-store';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../src/hooks/useAuth';
 import { useTheme } from '../../src/hooks/useTheme';
 import { Button } from '../../src/components/ui/Button';
 import { Input } from '../../src/components/ui/Input';
-import { spacing } from '../../src/theme/spacing';
+import { spacing, radius } from '../../src/theme/spacing';
 import { typography } from '../../src/theme/typography';
+
+const STORE_KEY = 'saved_credentials';
 
 const schema = z.object({
   email: z.string().email('請輸入有效的 Email'),
@@ -23,16 +27,30 @@ export default function LoginScreen() {
   const { colors } = useTheme();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
-  const { control, handleSubmit, formState: { errors } } = useForm<FormData>({
+  const { control, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
+
+  useEffect(() => {
+    SecureStore.getItemAsync(STORE_KEY).then(email => {
+      if (!email) return;
+      setValue('email', email);
+      setRememberMe(true);
+    });
+  }, []);
 
   const onSubmit = async (data: FormData) => {
     setError('');
     setLoading(true);
     try {
       await signIn(data.email, data.password);
+      if (rememberMe) {
+        await SecureStore.setItemAsync(STORE_KEY, data.email);
+      } else {
+        await SecureStore.deleteItemAsync(STORE_KEY);
+      }
     } catch (e: any) {
       setError(e.message || '登入失敗，請再試一次');
     } finally {
@@ -83,6 +101,13 @@ export default function LoginScreen() {
           )}
         />
 
+        <TouchableOpacity style={styles.rememberRow} onPress={() => setRememberMe(v => !v)} activeOpacity={0.7}>
+          <View style={[styles.checkbox, { borderColor: rememberMe ? colors.primary : colors.border, backgroundColor: rememberMe ? colors.primary : 'transparent' }]}>
+            {rememberMe && <Ionicons name="checkmark" size={14} color="#fff" />}
+          </View>
+          <Text style={[styles.rememberText, { color: colors.textSecondary }]}>記住 Email</Text>
+        </TouchableOpacity>
+
         {error ? <Text style={[styles.errorMsg, { color: colors.error }]}>{error}</Text> : null}
 
         <Button title="登入" onPress={handleSubmit(onSubmit)} loading={loading} style={styles.btn} />
@@ -104,6 +129,9 @@ const styles = StyleSheet.create({
   inner: { flexGrow: 1, justifyContent: 'center', padding: spacing.xl },
   logo: { fontSize: 56, textAlign: 'center', marginBottom: spacing.xs },
   subtitle: { fontSize: typography.sizes.md, textAlign: 'center', marginBottom: spacing.xxl },
+  rememberRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
+  checkbox: { width: 20, height: 20, borderRadius: radius.sm, borderWidth: 1.5, alignItems: 'center', justifyContent: 'center' },
+  rememberText: { fontSize: typography.sizes.sm },
   errorMsg: { fontSize: typography.sizes.sm, textAlign: 'center', marginBottom: spacing.md },
   btn: { marginTop: spacing.md },
   linkWrapper: { marginTop: spacing.xl, alignItems: 'center' },
