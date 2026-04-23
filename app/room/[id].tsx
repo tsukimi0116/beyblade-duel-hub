@@ -29,7 +29,7 @@ export default function RoomDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, profile } = useAuth();
   const { colors } = useTheme();
-  const { room, participants, loading } = useRoom(id!);
+  const { room, participants, loading, refetch } = useRoom(id!);
   const [actionLoading, setActionLoading] = useState(false);
   const [passwordModal, setPasswordModal] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -67,6 +67,7 @@ export default function RoomDetailScreen() {
     try {
       const { error } = await supabase.from('room_participants').insert({ room_id: room.id, user_id: user!.id });
       if (error) throw error;
+      await refetch();
       sendNotificationToRoom(room.id, '有人加入約戰！', `「${profile?.username}」加入了你的約戰！`, user!.id);
     } catch (e: any) {
       Alert.alert('錯誤', e.message);

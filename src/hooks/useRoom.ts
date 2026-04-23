@@ -46,5 +46,7 @@ export function useRoom(roomId: string) {
     return () => { supabase.removeChannel(channel); };
   }, [roomId]);
 
-  return { room, participants, loading, refetch: fetchRoom };
+  const refetch = () => Promise.all([fetchRoom(), fetchParticipants()]);
+
+  return { room, participants, loading, refetch };
 }
