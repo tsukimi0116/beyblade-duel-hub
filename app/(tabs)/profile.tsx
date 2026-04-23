@@ -25,7 +25,6 @@ export default function ProfileScreen() {
   const [city, setCity] = useState('');
   const [saving, setSaving] = useState(false);
   const [myRooms, setMyRooms] = useState<Room[]>([]);
-  const [joinedRooms, setJoinedRooms] = useState<Room[]>([]);
 
   useEffect(() => {
     if (profile) { setUsername(profile.username); setCity(profile.city || ''); }
@@ -33,11 +32,15 @@ export default function ProfileScreen() {
 
   useEffect(() => {
     if (!user) return;
-    supabase.from('rooms').select('*, host:profiles!host_id(username, avatar_url)').eq('host_id', user.id).order('scheduled_at', { ascending: false }).then(({ data }) => setMyRooms((data as Room[]) ?? []));
-    supabase.from('room_participants').select('room:rooms!room_id(*, host:profiles!host_id(username, avatar_url))').eq('user_id', user.id).then(({ data }) => {
-      const rooms = (data ?? []).map((d: any) => d.room).filter(Boolean) as Room[];
-      setJoinedRooms(rooms.filter(r => r.host_id !== user.id));
-    });
+    supabase
+      .from('room_participants')
+      .select('room:rooms!room_id(*, host:profiles!host_id(username, avatar_url))')
+      .eq('user_id', user.id)
+      .then(({ data }) => {
+        const rooms = (data ?? []).map((d: any) => d.room).filter(Boolean) as Room[];
+        rooms.sort((a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime());
+        setMyRooms(rooms);
+      });
   }, [user]);
 
   const handleSave = async () => {
@@ -95,20 +98,14 @@ export default function ProfileScreen() {
           )}
         </Card>
 
-        {/* 我開的房 */}
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>我開的房</Text>
+        {/* 我的約戰 */}
+        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>我的約戰</Text>
         {myRooms.length === 0 ? (
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>還沒有開過房間</Text>
+          <Text style={[styles.emptyText, { color: colors.textMuted }]}>還沒有參加任何約戰</Text>
         ) : (
-          myRooms.map(r => <RoomCard key={r.id} room={r} />)
-        )}
-
-        {/* 我加入的房 */}
-        <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>我加入的房</Text>
-        {joinedRooms.length === 0 ? (
-          <Text style={[styles.emptyText, { color: colors.textMuted }]}>還沒有加入任何房間</Text>
-        ) : (
-          joinedRooms.map(r => <RoomCard key={r.id} room={r} />)
+          myRooms.map(r => (
+            <RoomCard key={r.id} room={r} role={r.host_id === user?.id ? '房主' : '參戰者'} />
+          ))
         )}
 
         <Button title="登出" onPress={handleSignOut} variant="danger" style={styles.signOutBtn} />

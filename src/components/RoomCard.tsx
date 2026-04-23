@@ -32,7 +32,7 @@ function statusInfo(room: Room, colors: any) {
   return { label: '開放中', color: colors.statusOpen };
 }
 
-export function RoomCard({ room }: { room: Room }) {
+export function RoomCard({ room, role }: { room: Room; role?: '房主' | '參戰者' }) {
   const { colors } = useTheme();
   const status = statusInfo(room, colors);
 
@@ -45,6 +45,7 @@ export function RoomCard({ room }: { room: Room }) {
       <View style={styles.topRow}>
         <View style={styles.badges}>
           <Badge label={BATTLE_TYPE_LABEL[room.battle_type]} color={colors.primary} />
+          {role && <Badge label={role} color={role === '房主' ? colors.warning : colors.textMuted} />}
         </View>
         <View style={styles.topRight}>
           {room.is_private && <Ionicons name="lock-closed" size={14} color={colors.textMuted} style={{ marginRight: 4 }} />}
