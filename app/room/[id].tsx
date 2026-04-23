@@ -106,10 +106,18 @@ export default function RoomDetailScreen() {
       { text: '取消', style: 'cancel' },
       { text: '關閉', style: 'destructive', onPress: async () => {
         setActionLoading(true);
-        await supabase.from('rooms').update({ status: 'cancelled' }).eq('id', room.id);
-        sendNotificationToRoom(room.id, '約戰已取消', `約戰「${room.title}」已被取消`, user!.id);
-        setActionLoading(false);
-        router.back();
+        try {
+          const { error } = await supabase.from('rooms').update({ status: 'cancelled' }).eq('id', room.id);
+          if (error) throw error;
+          sendNotificationToRoom(room.id, '約戰已取消', `約戰「${room.title}」已被取消`, user!.id);
+          Alert.alert('已關閉', '房間已成功關閉', [
+            { text: '確認', onPress: () => router.replace('/(tabs)') },
+          ]);
+        } catch (e: any) {
+          Alert.alert('錯誤', e.message);
+        } finally {
+          setActionLoading(false);
+        }
       }},
     ]);
   };
