@@ -104,5 +104,5 @@ const styles = StyleSheet.create({
   subtitle: { fontSize: typography.sizes.md, textAlign: 'center', marginBottom: spacing.xxl },
   errorMsg: { fontSize: typography.sizes.sm, textAlign: 'center', marginBottom: spacing.md },
   btn: { marginTop: spacing.md },
-  link: { textAlign: 'center', marginTop: spacing.lg, fontSize: typography.sizes.sm },
+  link: { textAlign: 'center', marginTop: spacing.xl, fontSize: typography.sizes.sm },
 });
